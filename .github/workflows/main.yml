@@ -62,5 +62,5 @@ jobs:
           cd /home/itstep/groupProject
           tar -xzvf app.tar.gz
           cd out
-          docker-compose up -d --build
+          docker compose up -d --build
           EOF

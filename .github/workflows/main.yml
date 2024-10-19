@@ -61,6 +61,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
           cd /home/itstep/groupProject/backend
           tar -xzvf app.tar.gz
+          rm app.tar.gz
           cd ..
           docker compose down --rmi all
           docker compose up -d --build

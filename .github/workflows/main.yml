@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
@@ -54,13 +54,13 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Copy artifact to server via SCP
-        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/groupProject/app.tar.gz
+        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/groupProject/backend/app.tar.gz
 
       - name: SSH into server and extract
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-          cd /home/itstep/groupProject
+          cd /home/itstep/groupProject/backend
           tar -xzvf app.tar.gz
-          cd out
+          cd ..
           docker compose up -d --build
           EOF

@@ -1,0 +1,66 @@
+name: Build and Copy to Server
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Back-end/DENMAP_SERVER.csproj
+
+      - name: Build the project
+        run: dotnet publish Back-end/DENMAP_SERVER.csproj -c Release -o out
+
+      - name: Copy Dockerfile
+        run: cp Back-end/Dockerfile out/
+
+      - name: Archive the output
+        run: tar -czvf app.tar.gz -C out .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-artifact
+          path: app.tar.gz
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: app-artifact
+          path: ./app
+
+      - name: Setup SSH agent and add private key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy artifact to server via SCP
+        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/groupProject/app.tar.gz
+
+      - name: SSH into server and extract
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          cd /home/itstep/groupProject
+          tar -xzvf app.tar.gz
+          cd out
+          docker-compose up -d --build
+          EOF

@@ -1,4 +1,5 @@
 ﻿using Nancy.Hosting.Self;
+using System.Threading;
 
 namespace DENMAP_SERVER
 {
@@ -11,8 +12,8 @@ namespace DENMAP_SERVER
             using (var host = new NancyHost(uri))
             {
                 host.Start();
-                Console.WriteLine($"NancyFX is running on {uri}. Press Enter to exit.");
-                Console.ReadLine();
+                Console.WriteLine($"NancyFX is running on {uri}.");
+                Thread.Sleep(Timeout.Infinite);
             }
         }
     }

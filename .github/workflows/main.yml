@@ -53,14 +53,13 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Copy artifact to server via SCP
-        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/app.tar.gz
+        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/groupProject/app.tar.gz
 
       - name: SSH into server and extract
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-          cd /home/itstep
+          cd /home/itstep/groupProject
           tar -xzvf app.tar.gz
           cd out
-          docker build -t server-app .
-          docker run -d -p 80:80 server-app
+          docker-compose up -d --build
           EOF
